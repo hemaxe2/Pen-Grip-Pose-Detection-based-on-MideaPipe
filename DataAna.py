@@ -81,8 +81,8 @@ if __name__ == "__main__":
                        'Distance 48', 'Distance 37', 'Distance 26', 'distance_812', 'distance_1216', 'distance_1620']
 
     # 创建保存图片的文件夹
-    wrong_save_dir = 'wrong_image'
-    correct_save_dir = 'correct_image'
+    wrong_save_dir = 'Results_of_correct_gestures'
+    correct_save_dir = 'Results of incorrect gestures'
 
     for save_dir, data_path in zip([wrong_save_dir, correct_save_dir], [wrong_data_path, correct_data_path]):
         if not os.path.exists(save_dir):
