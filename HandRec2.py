@@ -90,16 +90,44 @@ def hand_angle(hand_):
 
     return angle_list, distance_48, distance_37, distance_26, distance_812, distance_1216, distance_1620
 
-def h_gesture(angle_list):
+def h_gesture(angle_list, distance_48):
     thr_angle = 65.
     thr_angle_thumb = 53.
     thr_angle_s = 49.
-    gesture_str = "Correct Posture"
+    min_correct_tumb = 30
+    max_correct_tumb = 100
+    min_correct_index = 80
+    max_correct_index = 180
+    min_correct_middle = 90
+    max_correct_middle = 180
+    min_correct_ring = 80
+    max_correct_ring =180
+    min_correct_pinky = 80
+    max_correct_pinky = 180
+    min_correct_angle7 = 80
+    max_correct_angle7 = 100
+    min_correct_angle11 = 100
+    max_correct_angle11 = 180
+    max_dis48 = 100
+
+
+
+
+
+    gesture_str = "Wrong Posture"
     if 65535. not in angle_list:
 
         if (angle_list[0] > thr_angle_thumb) and (angle_list[1] > thr_angle) and (angle_list[2] < thr_angle_s) and (
                 angle_list[3] > thr_angle) and (angle_list[4] > thr_angle):
             gesture_str = "Fxxk"
+        if (min_correct_tumb < angle_list[0] < max_correct_tumb) and (min_correct_index < angle_list[1] <
+                max_correct_index) and (min_correct_middle < angle_list[2] < max_correct_middle) and (min_correct_ring <
+                angle_list[3] < max_correct_ring) and (min_correct_pinky < angle_list[4] < max_correct_pinky) and (
+                min_correct_angle7 < angle_list[7] < max_correct_angle7 ) and (min_correct_angle11 < angle_list[11]
+                < max_correct_angle11) and (distance_48 < max_dis48):
+            gesture_str = "Correct Posture"
+
+
 
     return gesture_str
 
