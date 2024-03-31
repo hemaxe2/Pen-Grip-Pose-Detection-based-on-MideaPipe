@@ -1,6 +1,3 @@
-![image-1](https://github.com/hemaxe2/Pen-Grip-Pose-Detection-based-on-MideaPipe/assets/133490032/1ff2ee28-f8c8-4160-bf78-59ddeb284148)# -WKUCPS-4951-G10
-Pen Grip Pose Detection based on MideaPipe
-
 # WKUCPS-4951-G10 Pen Grip Pose Detection based on MediaPipe
 
 ## Introduction
