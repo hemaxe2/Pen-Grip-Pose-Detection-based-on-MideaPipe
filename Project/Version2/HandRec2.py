@@ -1,10 +1,11 @@
 import cv2
 import mediapipe as mp
 import math
+import datetime
 
 def vector_2d_angle(v1, v2):
     '''
-    求解二维向量的角度
+    Calculate the angle between two 2D vectors
     '''
     v1_x = v1[0]
     v1_y = v1[1]
@@ -20,7 +21,7 @@ def vector_2d_angle(v1, v2):
 
 def calculate_distance(point1, point2):
     '''
-    计算两点之间的欧氏距离
+    Calculate the Euclidean distance between two points
     '''
     dx = point2[0] - point1[0]
     dy = point2[1] - point1[1]
@@ -28,9 +29,9 @@ def calculate_distance(point1, point2):
     return distance
 
 def hand_angle(hand_):
-    angle_list = []  # 存储角度的列表
+    angle_list = []  # Store angles in a list
 
-    # 计算手指之间的角度
+    # Calculate angles between fingers
     angle_0 = vector_2d_angle(((hand_[0][0] - hand_[2][0]), (hand_[0][1] - hand_[2][1])),
                               ((hand_[3][0] - hand_[4][0]), (hand_[3][1] - hand_[4][1])))
     angle_list.append(angle_0)
@@ -51,7 +52,7 @@ def hand_angle(hand_):
                               ((hand_[19][0] - hand_[20][0]), (hand_[19][1] - hand_[20][1])))
     angle_list.append(angle_4)
 
-    # 计算手指关节之间的角度
+    # Calculate angles between finger joints
     angle_5 = vector_2d_angle(((hand_[0][0] - hand_[2][0]), (hand_[0][1] - hand_[2][1])),
                               ((hand_[2][0] - hand_[3][0]), (hand_[2][1] - hand_[3][1])))
     angle_list.append(angle_5)
@@ -80,7 +81,7 @@ def hand_angle(hand_):
                                ((hand_[11][0] - hand_[12][0]), (hand_[11][1] - hand_[12][1])))
     angle_list.append(angle_11)
 
-    # 计算手指关节之间的距离
+    # Calculate distances between finger joints
     distance_48 = calculate_distance(hand_[4], hand_[8])
     distance_37 = calculate_distance(hand_[3], hand_[7])
     distance_26 = calculate_distance(hand_[2], hand_[6])
@@ -101,29 +102,80 @@ def h_gesture(angle_list, distance_48):
     max_correct_ring =180
     min_correct_pinky = 80
     max_correct_pinky = 180
-    min_correct_angle7 = 80
-    max_correct_angle7 = 100
-    min_correct_angle11 = 100
-    max_correct_angle11 = 180
     max_dis48 = 100
 
     gesture_str = "Wrong Posture"
     if 65535. not in angle_list:
 
-        if (min_correct_tumb < angle_list[0] < max_correct_tumb) and (min_correct_index < angle_list[1] <
-                max_correct_index) and (min_correct_middle < angle_list[2] < max_correct_middle) and (min_correct_ring <
-                angle_list[3] < max_correct_ring) and (min_correct_pinky < angle_list[4] < max_correct_pinky)  (distance_48 < max_dis48):
+        if (min_correct_tumb < angle_list[0] < max_correct_tumb) and \
+                (min_correct_index < angle_list[1] < max_correct_index) and \
+                (min_correct_middle < angle_list[2] < max_correct_middle) and \
+                (min_correct_ring < angle_list[3] < max_correct_ring) and \
+                (min_correct_pinky < angle_list[4] < max_correct_pinky) and \
+                (distance_48 < max_dis48):
             gesture_str = "Correct Posture"
-
-            # and (min_correct_angle7 < angle_list[7] < max_correct_angle7 ) and (min_correct_angle11 < angle_list[11]
-            #< max_correct_angle11) and 
-
-
 
     return gesture_str
 
+def alignment_detection(angle_list, distance_48):
+    min_correct_tumb = 30
+    max_correct_tumb = 100
+    min_correct_index = 80
+    max_correct_index = 180
+    min_correct_middle = 90
+    max_correct_middle = 180
+    min_correct_ring = 80
+    max_correct_ring = 180
+    min_correct_pinky = 80
+    max_correct_pinky = 180
+    max_dis48 = 100
+
+    detection_result = ""
+
+    # Thumb angle detection
+    if angle_list[0] < min_correct_tumb:
+        detection_result += "Thumb angle too small. "
+    elif angle_list[0] > max_correct_tumb:
+        detection_result += "Thumb angle too large. "
+    else:
+        detection_result += "Thumb angle is good. "
+
+    # Other finger angle detection
+    if angle_list[1] < min_correct_index:
+        detection_result += "Index finger angle too small. "
+
+    if angle_list[2] < min_correct_middle:
+        detection_result += "Middle finger angle too small. "
+
+    if angle_list[3] < min_correct_ring:
+        detection_result += "Ring finger angle too small. "
+
+    if angle_list[4] < min_correct_pinky:
+        detection_result += "Pinky finger angle too small. "
+    else:
+        detection_result += "good. "
+
+    # Thumb-finger distance detection
+    if distance_48 > max_dis48:
+        detection_result += "Thumb and index finger distance too large. "
+    else:
+        detection_result += "good. "
+
+    return detection_result
+
+def print_initial_info(angle_list, distance_48, gesture_str, detection_result):
+    print("Current Beijing Time:", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    print("Your Posture:",gesture_str)
+    print("Initial Hand Angles:")
+    print("Thumb Angle:", angle_list[0])
+    print("Index Finger Angle:", angle_list[1])
+    print("Middle Finger Angle:", angle_list[2])
+    print("Ring Finger Angle:", angle_list[3])
+    print("Pinky Finger Angle:", angle_list[4])
+    print("Thumb and Index Finger Distance:", distance_48)
+    print("Suggestion For You:", detection_result)
+
 def detect():
-    # 初始化MediaPipe Hands模型
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(
@@ -132,28 +184,23 @@ def detect():
         min_detection_confidence=0.75,
         min_tracking_confidence=0.75)
 
-    # 打开摄像头
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     while True:
-        # 读取摄像头帧
         ret, frame = cap.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
         results = hands.process(frame)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-        # 获取手势标签
         if results.multi_handedness:
             for hand_label in results.multi_handedness:
                 hand_jugg = str(hand_label).split('"')[1]
                 print(hand_jugg)
                 cv2.putText(frame, hand_jugg, (50, 200), 0, 1.3, (0, 0, 255), 2)
 
-        # 获取手部关键点
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                # 修改绘制手部关键点的颜色
                 mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
                                            mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2),
                                            mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2))
@@ -168,8 +215,11 @@ def detect():
                     angle_list, distance_48, distance_37, distance_26, distance_812, distance_1216, distance_1620 = hand_angle(
                         hand_local)
                     gesture_str = h_gesture(angle_list, distance_48)
-                    print(gesture_str)
+                    detection_result = alignment_detection(angle_list, distance_48)
+                    print_initial_info(angle_list, distance_48, gesture_str, detection_result)
                     cv2.putText(frame, gesture_str, (50, 100), 0, 1.3, (0, 0, 255), 2)
+
+                    print_initial_info(angle_list, distance_48, gesture_str, detection_result)
 
         cv2.imshow('MediaPipe Hands', frame)
 
@@ -181,4 +231,3 @@ def detect():
 
 if __name__ == '__main__':
     detect()
-

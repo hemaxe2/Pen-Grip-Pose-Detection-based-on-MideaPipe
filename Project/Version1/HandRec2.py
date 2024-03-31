@@ -4,7 +4,7 @@ import math
 
 def vector_2d_angle(v1, v2):
     '''
-    求解二维向量的角度
+    Calculate the angle between two 2D vectors
     '''
     v1_x = v1[0]
     v1_y = v1[1]
@@ -20,7 +20,7 @@ def vector_2d_angle(v1, v2):
 
 def calculate_distance(point1, point2):
     '''
-    计算两点之间的欧氏距离
+    Calculate the Euclidean distance between two points
     '''
     dx = point2[0] - point1[0]
     dy = point2[1] - point1[1]
@@ -28,9 +28,9 @@ def calculate_distance(point1, point2):
     return distance
 
 def hand_angle(hand_):
-    angle_list = []  # 存储角度的列表
+    angle_list = []  # Store angles in a list
 
-    # 计算手指之间的角度
+    # Calculate angles between fingers
     angle_0 = vector_2d_angle(((hand_[0][0] - hand_[2][0]), (hand_[0][1] - hand_[2][1])),
                               ((hand_[3][0] - hand_[4][0]), (hand_[3][1] - hand_[4][1])))
     angle_list.append(angle_0)
@@ -51,7 +51,7 @@ def hand_angle(hand_):
                               ((hand_[19][0] - hand_[20][0]), (hand_[19][1] - hand_[20][1])))
     angle_list.append(angle_4)
 
-    # 计算手指关节之间的角度
+    # Calculate angles between finger joints
     angle_5 = vector_2d_angle(((hand_[0][0] - hand_[2][0]), (hand_[0][1] - hand_[2][1])),
                               ((hand_[2][0] - hand_[3][0]), (hand_[2][1] - hand_[3][1])))
     angle_list.append(angle_5)
@@ -80,7 +80,7 @@ def hand_angle(hand_):
                                ((hand_[11][0] - hand_[12][0]), (hand_[11][1] - hand_[12][1])))
     angle_list.append(angle_11)
 
-    # 计算手指关节之间的距离
+    # Calculate distances between finger joints
     distance_48 = calculate_distance(hand_[4], hand_[8])
     distance_37 = calculate_distance(hand_[3], hand_[7])
     distance_26 = calculate_distance(hand_[2], hand_[6])
@@ -110,20 +110,23 @@ def h_gesture(angle_list, distance_48):
     gesture_str = "Wrong Posture"
     if 65535. not in angle_list:
 
-        if (min_correct_tumb < angle_list[0] < max_correct_tumb) and (min_correct_index < angle_list[1] <
-                max_correct_index) and (min_correct_middle < angle_list[2] < max_correct_middle) and (min_correct_ring <
-                angle_list[3] < max_correct_ring) and (min_correct_pinky < angle_list[4] < max_correct_pinky)  (distance_48 < max_dis48):
+        if (min_correct_tumb < angle_list[0] < max_correct_tumb) and \
+                (min_correct_index < angle_list[1] < max_correct_index) and \
+                (min_correct_middle < angle_list[2] < max_correct_middle) and \
+                (min_correct_ring < angle_list[3] < max_correct_ring) and \
+                (min_correct_pinky < angle_list[4] < max_correct_pinky) and \
+                (distance_48 < max_dis48):
             gesture_str = "Correct Posture"
 
             # and (min_correct_angle7 < angle_list[7] < max_correct_angle7 ) and (min_correct_angle11 < angle_list[11]
-            #< max_correct_angle11) and 
+            #< max_correct_angle11) and
 
 
 
     return gesture_str
 
 def detect():
-    # 初始化MediaPipe Hands模型
+    # Initialize the MediaPipe Hands model
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(
@@ -132,28 +135,28 @@ def detect():
         min_detection_confidence=0.75,
         min_tracking_confidence=0.75)
 
-    # 打开摄像头
+    # Open the webcam
     cap = cv2.VideoCapture(0)
 
     while True:
-        # 读取摄像头帧
+        # Read a frame from the webcam
         ret, frame = cap.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)
         results = hands.process(frame)
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-        # 获取手势标签
+        # Get hand gestures
         if results.multi_handedness:
             for hand_label in results.multi_handedness:
                 hand_jugg = str(hand_label).split('"')[1]
                 print(hand_jugg)
                 cv2.putText(frame, hand_jugg, (50, 200), 0, 1.3, (0, 0, 255), 2)
 
-        # 获取手部关键点
+        # Get hand landmarks
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
-                # 修改绘制手部关键点的颜色
+                # Modify the color for drawing hand landmarks
                 mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS,
                                            mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2),
                                            mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2))
@@ -173,7 +176,7 @@ def detect():
 
         cv2.imshow('MediaPipe Hands', frame)
 
-        if cv2.waitKey(200) & 0xFF == 27:
+        if cv2.waitKey(20) & 0xFF == 27:
             break
 
     cap.release()
@@ -181,4 +184,5 @@ def detect():
 
 if __name__ == '__main__':
     detect()
+
 
