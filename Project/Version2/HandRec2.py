@@ -184,7 +184,7 @@ def detect():
         min_detection_confidence=0.75,
         min_tracking_confidence=0.75)
 
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     while True:
         ret, frame = cap.read()
